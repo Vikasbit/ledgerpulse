@@ -7,8 +7,8 @@ import { useAuth } from "@/lib/auth/context";
 import { useDemo } from "@/lib/demo/context";
 
 export function TopBar() {
-  const { user, isDemo, signOut } = useAuth();
-  const { businesses } = useDemo();
+  const { user, signOut } = useAuth();
+  const { businesses, isLiveConnected } = useDemo();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const notifications = [
@@ -51,16 +51,16 @@ export function TopBar() {
 
       {/* Right Action Bar */}
       <div className="flex items-center space-x-3 ml-4">
-        {/* Environment Status Badge */}
-        {isDemo ? (
+        {/* Environment Status Badge - Only displays Live when an actual Supabase request succeeds */}
+        {isLiveConnected ? (
           <div className="hidden sm:flex items-center space-x-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Sandbox Mode</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>Live Supabase Connected</span>
           </div>
         ) : (
           <div className="hidden sm:flex items-center space-x-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70">
-            <span className="w-2 h-2 rounded-full bg-indigo-500" />
-            <span>Production</span>
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <span>Sandbox Mode</span>
           </div>
         )}
 
