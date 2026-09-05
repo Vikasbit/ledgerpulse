@@ -2,14 +2,17 @@
 
 // components/dashboard/TopBar.tsx
 import React, { useState } from "react";
-import { Search, Bell, User, LogOut, CheckCircle2, Clock, Sparkles, X } from "lucide-react";
+import { Search, Bell, User, LogOut, CheckCircle2, Clock, Sparkles, X, Bot } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
 import { useDemo } from "@/lib/demo/context";
+import { useReconciliation } from "@/lib/reconciliation/context";
 
 export function TopBar() {
   const { user, signOut } = useAuth();
   const { businesses, isLiveConnected } = useDemo();
+  const { setCopilotOpen } = useReconciliation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+
 
   const notifications = [
     {
@@ -63,6 +66,15 @@ export function TopBar() {
             <span>Sandbox Mode</span>
           </div>
         )}
+
+        {/* Ask Copilot Button */}
+        <button
+          onClick={() => setCopilotOpen(true)}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors shadow-xs"
+        >
+          <Bot size={14} className="text-indigo-600" />
+          <span>Ask Copilot</span>
+        </button>
 
         {/* Notifications Button */}
         <div className="relative">

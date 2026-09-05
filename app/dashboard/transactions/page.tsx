@@ -2,6 +2,7 @@
 
 // app/dashboard/transactions/page.tsx
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import { useDemo } from "@/lib/demo/context";
 import { Modal } from "@/components/ui/Modal";
 import { RazorpayCheckout } from "@/components/razorpay/RazorpayCheckout";
@@ -18,7 +19,11 @@ import {
   CreditCard,
   RotateCcw,
   Sparkles,
+  Bot,
+  ArrowRight,
+  AlertTriangle,
 } from "lucide-react";
+
 
 const PAGE_SIZE = 12;
 
@@ -294,12 +299,16 @@ export default function TransactionsPage() {
                 <th className="text-left px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">
                   Timestamp
                 </th>
+                <th className="text-right px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  AI Forensic
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginated.map((txn) => {
                 const initial = txn.customer_name ? txn.customer_name.charAt(0) : "C";
                 const isCopied = copiedId === txn.transaction_id;
+                const isException = txn.status === "failed" || txn.status === "refunded";
 
                 return (
                   <tr
@@ -378,9 +387,27 @@ export default function TransactionsPage() {
                     <td className="px-5 py-3.5 text-slate-400 font-mono text-xs hidden lg:table-cell">
                       {formatDate(txn.transaction_date)}
                     </td>
+
+                    {/* AI Forensic Column */}
+                    <td className="px-5 py-3.5 text-right">
+                      {isException ? (
+                        <Link
+                          href="/dashboard/exceptions"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-200/80 transition-colors shadow-2xs"
+                        >
+                          <AlertTriangle size={12} />
+                          <span>Investigate</span>
+                        </Link>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                          <Check size={12} /> Reconciled
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
+
 
               {paginated.length === 0 && (
                 <tr>

@@ -17,20 +17,25 @@ import {
   ExternalLink,
   HelpCircle,
   Building,
+  AlertTriangle,
 } from "lucide-react";
 import { useDemo } from "@/lib/demo/context";
+import { useReconciliation } from "@/lib/reconciliation/context";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/exceptions", label: "Exceptions", icon: AlertTriangle, hasBadge: true },
   { href: "/dashboard/transactions", label: "Transactions", icon: Receipt },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/import", label: "Import CSV", icon: FileSpreadsheet },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
+
 export function Sidebar() {
   const pathname = usePathname();
   const { isDemo, businesses } = useDemo();
+  const { unresolvedCount } = useReconciliation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (href: string) => {
@@ -85,6 +90,8 @@ export function Sidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
+          const showBadge = (item as any).hasBadge && unresolvedCount > 0;
+
           return (
             <Link
               key={item.href}
@@ -93,7 +100,7 @@ export function Sidebar() {
               className={cn(
                 "group relative flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all",
                 active
-                  ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30"
+                  ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/30 font-bold"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/70"
               )}
             >
@@ -105,13 +112,19 @@ export function Sidebar() {
                 )}
               />
               <span className="flex-1">{item.label}</span>
-              {active && (
+              {showBadge && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-500 text-white shadow-xs animate-pulse">
+                  {unresolvedCount}
+                </span>
+              )}
+              {active && !showBadge && (
                 <span className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
               )}
             </Link>
           );
         })}
       </nav>
+
 
       {/* Demo Sandbox Alert Card */}
       {isDemo && (

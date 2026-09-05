@@ -5,6 +5,8 @@ import React from "react";
 import { useAuth } from "@/lib/auth/context";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
+import { ReconciliationProvider } from "@/lib/reconciliation/context";
+import { CopilotDrawer } from "@/components/ai/CopilotDrawer";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -31,12 +33,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+    <ReconciliationProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <TopBar />
+          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        </div>
       </div>
-    </div>
+      <CopilotDrawer />
+    </ReconciliationProvider>
   );
 }
+

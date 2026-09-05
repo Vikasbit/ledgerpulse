@@ -4,6 +4,7 @@
 import React, { useState, useCallback, useRef, useMemo } from "react";
 import { useDemo } from "@/lib/demo/context";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useReconciliation } from "@/lib/reconciliation/context";
 import { parseCSVString } from "@/lib/csv/parser";
 import { DemoTransaction } from "@/lib/demo/sampleData";
 import {
@@ -22,20 +23,28 @@ import {
   Clock,
   Sparkles,
   FileSpreadsheet,
+  Layers,
+  Building2,
+  Receipt,
+  RotateCcw,
 } from "lucide-react";
 
 type Step = "upload" | "preview" | "confirm" | "done";
 type TabView = "wizard" | "history";
+type ImportMode = "single" | "multi";
 
 export default function ImportPage() {
   const { addTransactions, addImportRecord, imports, isDemo, businesses } = useDemo();
+  const { resetToDefault } = useReconciliation();
   const { addToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<TabView>("wizard");
+  const [importMode, setImportMode] = useState<ImportMode>("single");
   const [step, setStep] = useState<Step>("upload");
   const [file, setFile] = useState<File | null>(null);
   const [csvText, setCsvText] = useState<string>("");
+
   const [parseResult, setParseResult] = useState<ReturnType<
     typeof parseCSVString
   > | null>(null);
@@ -217,7 +226,100 @@ TXN8005,Vikram Malhotra,12000,INR,success,card,2024-03-13`;
         </div>
       </div>
 
-      {activeTab === "wizard" && (
+      {/* Import Mode Switcher */}
+      <div className="flex items-center space-x-3 bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xs">
+        <button
+          onClick={() => setImportMode("single")}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 ${
+            importMode === "single"
+              ? "bg-slate-900 text-white shadow-sm"
+              : "text-slate-600 hover:bg-slate-100"
+          }`}
+        >
+          <FileSpreadsheet size={15} />
+          <span>Standard Transaction CSV</span>
+        </button>
+        <button
+          onClick={() => setImportMode("multi")}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 ${
+            importMode === "multi"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
+              : "text-slate-600 hover:bg-slate-100"
+          }`}
+        >
+          <Layers size={15} />
+          <span>Multi-Ledger Merchant Reconciliation (6 Files)</span>
+        </button>
+      </div>
+
+      {importMode === "multi" && (
+        <div className="bg-white rounded-2xl border border-indigo-100 p-8 shadow-sm space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                Enterprise Multi-Ledger Ingestion
+              </span>
+              <h2 className="text-xl font-bold text-slate-900">
+                Cross-File Forensic Reconciliation
+              </h2>
+              <p className="text-xs text-slate-500 max-w-xl">
+                LedgerPulse correlates 6 distinct accounting datasets: Orders, Gateway Captures, Settlement Batches, Line Items, Refunds, and Bank Statements to detect leakage.
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
+              6 Datasets Active
+            </span>
+          </div>
+
+          {/* 6 Files Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[
+              { title: "1. Orders DB", file: "orders.csv", count: "100 records", desc: "Merchant checkout & invoices" },
+              { title: "2. Gateway Payments", file: "payments.csv", count: "98 captures", desc: "Razorpay / Stripe captured events" },
+              { title: "3. Settlement Batches", file: "settlements.csv", count: "12 batches", desc: "Acquiring bank disbursements" },
+              { title: "4. Settlement Items", file: "settlement_items.csv", count: "96 lines", desc: "MDR fees, taxes & deductions" },
+              { title: "5. Refund Register", file: "refunds.csv", count: "4 reversals", desc: "Customer care return ledger" },
+              { title: "6. Bank Statement Feed", file: "bank_entries.csv", count: "11 credits", desc: "HDFC / ICICI / SBI bank feeds" },
+            ].map((f, i) => (
+              <div key={i} className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-bold text-slate-900">{f.title}</span>
+                  <div className="font-mono text-[11px] text-indigo-600 font-semibold mt-0.5">{f.file}</div>
+                  <p className="text-[11px] text-slate-500 mt-1">{f.desc}</p>
+                </div>
+                <span className="text-[10px] font-semibold text-slate-400 mt-3 pt-2 border-t border-slate-200">
+                  {f.count}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Action Bar */}
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-xs text-slate-500">
+              Controlled test cases (Orders 91-100) will be reconciled with full evidence chains.
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  resetToDefault();
+                  addToast({
+                    title: "Multi-Ledger Reconciliation Complete",
+                    description: "10 Controlled test cases and evidence chains loaded into Exceptions Desk.",
+                    variant: "success",
+                  });
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all hover:scale-[1.02]"
+              >
+                <Sparkles size={14} />
+                <span>Run 6-Ledger Matching Suite</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importMode === "single" && activeTab === "wizard" && (
         <>
           {/* Progress Steps Header */}
           <div className="flex items-center justify-center space-x-3 py-2">

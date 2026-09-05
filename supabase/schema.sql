@@ -174,3 +174,65 @@ create policy "payment_records_tenant_all" on public.payment_records
       where b.owner_id = auth.uid()
     )
   );
+
+
+-- 7. RECONCILIATION EXCEPTIONS TABLE (AI Finance Controller & Forensic Desk)
+create table if not exists public.reconciliation_exceptions (
+  id text primary key,
+  business_id uuid references public.businesses(id) on delete cascade not null,
+  order_id text,
+  payment_id text,
+  transaction_ref text not null,
+  customer_name text,
+  classification text not null,
+  category_label text not null,
+  discrepancy_paise bigint default 0,
+  severity text check (severity in ('HIGH', 'MEDIUM', 'LOW')) default 'MEDIUM',
+  status text check (status in ('open', 'investigating', 'investigated', 'under_review', 'resolved', 'dismissed')) default 'open',
+  evidence_chain jsonb default '{}'::jsonb,
+  notes text,
+  tags text[] default '{}',
+  detected_at timestamp with time zone default now(),
+  created_at timestamp with time zone default now()
+);
+
+alter table public.reconciliation_exceptions enable row level security;
+
+drop policy if exists "reconciliation_exceptions_tenant_all" on public.reconciliation_exceptions;
+create policy "reconciliation_exceptions_tenant_all" on public.reconciliation_exceptions
+  for all using (
+    business_id in (select id from public.businesses where owner_id = auth.uid())
+  );
+
+
+-- 8. AI INVESTIGATIONS TABLE (Stores forensic audit findings from Gemini / Controller)
+create table if not exists public.ai_investigations (
+  id text primary key,
+  exception_id text references public.reconciliation_exceptions(id) on delete cascade not null,
+  classification text not null,
+  severity text not null,
+  confidence_score int default 90,
+  root_cause text not null,
+  summary text not null,
+  detailed_analysis text,
+  evidence_assessment jsonb default '[]'::jsonb,
+  financial_impact jsonb default '{}'::jsonb,
+  recommended_action jsonb default '{}'::jsonb,
+  needs_human_review boolean default false,
+  model_used text not null,
+  is_demo_fallback boolean default false,
+  created_at timestamp with time zone default now()
+);
+
+alter table public.ai_investigations enable row level security;
+
+drop policy if exists "ai_investigations_tenant_all" on public.ai_investigations;
+create policy "ai_investigations_tenant_all" on public.ai_investigations
+  for all using (
+    exception_id in (
+      select e.id from public.reconciliation_exceptions e
+      join public.businesses b on e.business_id = b.id
+      where b.owner_id = auth.uid()
+    )
+  );
+

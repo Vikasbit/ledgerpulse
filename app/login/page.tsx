@@ -10,7 +10,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isDemo } = useAuth();
+  const { isDemo, setDemoMode } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +23,7 @@ export default function LoginPage() {
     setLoading(true);
 
     if (isDemo) {
+      setDemoMode();
       router.push("/dashboard");
       return;
     }
@@ -30,6 +31,7 @@ export default function LoginPage() {
     try {
       const supabase = createSupabaseBrowserClient();
       if (!supabase) {
+        setDemoMode();
         router.push("/dashboard");
         return;
       }
@@ -47,8 +49,10 @@ export default function LoginPage() {
   };
 
   const handleQuickDemo = () => {
+    setDemoMode();
     router.push("/dashboard");
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4 relative overflow-hidden">

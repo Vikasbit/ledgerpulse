@@ -10,7 +10,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { isDemo } = useAuth();
+  const { isDemo, setDemoMode } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -30,6 +30,7 @@ export default function SignupPage() {
     setLoading(true);
 
     if (isDemo) {
+      setDemoMode();
       router.push("/dashboard");
       return;
     }
@@ -65,8 +66,10 @@ export default function SignupPage() {
   };
 
   const handleQuickDemo = () => {
+    setDemoMode();
     router.push("/dashboard");
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4 relative overflow-hidden py-12">
