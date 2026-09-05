@@ -217,63 +217,8 @@ export function generateDemoData(referenceDate: Date = DEMO_REFERENCE_DATE): {
     (a, b) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime()
   );
 
-  // Stable historical imports relative to reference date
-  const imports: DemoImportRecord[] = [
-    {
-      id: "imp-001",
-      filename: "march_sales_batch_1.csv",
-      imported_at: new Date(refTime - 2 * 3600000).toISOString(),
-      total_rows: 150,
-      valid_rows: 150,
-      error_rows: 0,
-      status: "completed",
-    },
-    {
-      id: "imp-002",
-      filename: "pos_settlement_reconciled.csv",
-      imported_at: new Date(refTime - 26 * 3600000).toISOString(),
-      total_rows: 85,
-      valid_rows: 80,
-      error_rows: 5,
-      status: "partial",
-    },
-    {
-      id: "imp-003",
-      filename: "upi_gateway_dump.csv",
-      imported_at: new Date(refTime - 3 * 86400000).toISOString(),
-      total_rows: 240,
-      valid_rows: 240,
-      error_rows: 0,
-      status: "completed",
-    },
-    {
-      id: "imp-004",
-      filename: "card_processors_export.csv",
-      imported_at: new Date(refTime - 7 * 86400000).toISOString(),
-      total_rows: 120,
-      valid_rows: 118,
-      error_rows: 2,
-      status: "partial",
-    },
-    {
-      id: "imp-005",
-      filename: "monthly_legacy_archive.csv",
-      imported_at: new Date(refTime - 14 * 86400000).toISOString(),
-      total_rows: 310,
-      valid_rows: 310,
-      error_rows: 0,
-      status: "completed",
-    },
-    {
-      id: "imp-006",
-      filename: "failed_payouts_audit.csv",
-      imported_at: new Date(refTime - 30 * 86400000).toISOString(),
-      total_rows: 25,
-      valid_rows: 0,
-      error_rows: 25,
-      status: "failed",
-    },
-  ];
+  // Historical imports initialized clean
+  const imports: DemoImportRecord[] = [];
 
   return { businesses, transactions, imports };
 }

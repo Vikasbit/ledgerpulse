@@ -27,6 +27,8 @@ import {
   Building2,
   Receipt,
   RotateCcw,
+  Trash2,
+  Inbox,
 } from "lucide-react";
 
 type Step = "upload" | "preview" | "confirm" | "done";
@@ -34,10 +36,11 @@ type TabView = "wizard" | "history";
 type ImportMode = "single" | "multi";
 
 export default function ImportPage() {
-  const { addTransactions, addImportRecord, imports, isDemo, businesses } = useDemo();
+  const { addTransactions, addImportRecord, imports, isDemo, businesses, clearImports } = useDemo();
   const { resetToDefault } = useReconciliation();
   const { addToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const [activeTab, setActiveTab] = useState<TabView>("wizard");
   const [importMode, setImportMode] = useState<ImportMode>("single");
@@ -639,108 +642,154 @@ TXN8005,Vikram Malhotra,12000,INR,success,card,2024-03-13`;
                 Audit log of all batch file uploads and reconciliation results
               </p>
             </div>
-            <button
-              onClick={() => {
-                reset();
-                setActiveTab("wizard");
-              }}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-all shadow-xs"
-            >
-              <Upload size={13} />
-              <span>New CSV Import</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              {imports.length > 0 && (
+                <button
+                  onClick={() => {
+                    clearImports();
+                    addToast({
+                      title: "Audit History Cleared",
+                      description: "All historical CSV ingestions have been removed.",
+                      variant: "info",
+                    });
+                  }}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all border border-rose-200 shadow-2xs"
+                  title="Clear all saved audit imports"
+                >
+                  <Trash2 size={13} />
+                  <span>Clear History</span>
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  reset();
+                  setActiveTab("wizard");
+                }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-all shadow-xs"
+              >
+                <Upload size={13} />
+                <span>New CSV Import</span>
+              </button>
+            </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto border border-slate-200 rounded-xl">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
-                <tr>
-                  <th className="p-3">File Name</th>
-                  <th className="p-3">Import Date</th>
-                  <th className="p-3">Total Rows</th>
-                  <th className="p-3">Valid Rows</th>
-                  <th className="p-3">Errors</th>
-                  <th className="p-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {paginatedImports.map((imp) => {
-                  return (
-                    <tr key={imp.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-3 font-semibold text-slate-800 flex items-center space-x-2">
-                        <FileText size={15} className="text-indigo-500 flex-shrink-0" />
-                        <span>{imp.filename}</span>
-                      </td>
-                      <td className="p-3 text-slate-400 font-mono text-[11px]">
-                        {new Date(imp.imported_at).toLocaleString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </td>
-                      <td className="p-3 text-slate-700 font-mono font-medium">{imp.total_rows}</td>
-                      <td className="p-3 text-emerald-600 font-mono font-bold">{imp.valid_rows}</td>
-                      <td className="p-3 text-rose-500 font-mono font-bold">{imp.error_rows}</td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                            imp.status === "completed"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
-                              : imp.status === "partial"
-                              ? "bg-amber-50 text-amber-700 border-amber-200/80"
-                              : "bg-rose-50 text-rose-700 border-rose-200/80"
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                              imp.status === "completed"
-                                ? "bg-emerald-500"
-                                : imp.status === "partial"
-                                ? "bg-amber-500"
-                                : "bg-rose-500"
-                            }`}
-                          />
-                          {imp.status}
-                        </span>
-                      </td>
+          {imports.length === 0 ? (
+            <div className="py-16 text-center space-y-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+              <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto text-slate-400 shadow-xs">
+                <Inbox size={26} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-slate-800">No Historical CSV Ingestions</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  Audit log is clean. When you upload and commit transaction CSVs, their batch audit history will be tracked here.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  reset();
+                  setActiveTab("wizard");
+                }}
+                className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-all"
+              >
+                <Upload size={14} />
+                <span>Start New Import</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Table */}
+              <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">File Name</th>
+                      <th className="p-3">Import Date</th>
+                      <th className="p-3">Total Rows</th>
+                      <th className="p-3">Valid Rows</th>
+                      <th className="p-3">Errors</th>
+                      <th className="p-3">Status</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {paginatedImports.map((imp) => {
+                      return (
+                        <tr key={imp.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="p-3 font-semibold text-slate-800 flex items-center space-x-2">
+                            <FileText size={15} className="text-indigo-500 flex-shrink-0" />
+                            <span>{imp.filename}</span>
+                          </td>
+                          <td className="p-3 text-slate-400 font-mono text-[11px]">
+                            {new Date(imp.imported_at).toLocaleString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>
+                          <td className="p-3 text-slate-700 font-mono font-medium">{imp.total_rows}</td>
+                          <td className="p-3 text-emerald-600 font-mono font-bold">{imp.valid_rows}</td>
+                          <td className="p-3 text-rose-500 font-mono font-bold">{imp.error_rows}</td>
+                          <td className="p-3">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                imp.status === "completed"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
+                                  : imp.status === "partial"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200/80"
+                                  : "bg-rose-50 text-rose-700 border-rose-200/80"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                  imp.status === "completed"
+                                    ? "bg-emerald-500"
+                                    : imp.status === "partial"
+                                    ? "bg-amber-500"
+                                    : "bg-rose-500"
+                                }`}
+                              />
+                              {imp.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
-            <div>
-              Showing {Math.min(imports.length, (historyPage - 1) * historyPerPage + 1)} to{" "}
-              {Math.min(imports.length, historyPage * historyPerPage)} of {imports.length} imports
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <button
-                onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
-                disabled={historyPage === 1}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="font-mono px-2 text-slate-700">
-                {historyPage} / {totalHistoryPages}
-              </span>
-              <button
-                onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}
-                disabled={historyPage === totalHistoryPages}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+              {/* Pagination */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
+                <div>
+                  Showing {Math.min(imports.length, (historyPage - 1) * historyPerPage + 1)} to{" "}
+                  {Math.min(imports.length, historyPage * historyPerPage)} of {imports.length} imports
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <button
+                    onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                    disabled={historyPage === 1}
+                    className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="font-mono px-2 text-slate-700">
+                    {historyPage} / {totalHistoryPages}
+                  </span>
+                  <button
+                    onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}
+                    disabled={historyPage === totalHistoryPages}
+                    className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
+
     </div>
   );
 }

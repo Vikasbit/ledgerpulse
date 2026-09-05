@@ -20,7 +20,9 @@ interface DemoContextValue {
   addTransactions: (txns: DemoTransaction[]) => void;
   addImportRecord: (record: DemoImportRecord) => void;
   refreshLiveData: () => Promise<void>;
+  clearImports: () => void;
 }
+
 
 const DemoContext = createContext<DemoContextValue | null>(null);
 
@@ -193,6 +195,16 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     ? liveBusinesses
     : data.businesses;
 
+  const clearImports = useCallback(() => {
+    setExtraImports([]);
+    setLiveImports([]);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("ledgerpulse_demo_extra_imports");
+      } catch (e) {}
+    }
+  }, []);
+
   return (
     <DemoContext.Provider
       value={{
@@ -205,12 +217,14 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         addTransactions,
         addImportRecord,
         refreshLiveData,
+        clearImports,
       }}
     >
       {children}
     </DemoContext.Provider>
   );
 }
+
 
 export function useDemo() {
   const ctx = useContext(DemoContext);
