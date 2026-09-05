@@ -176,9 +176,19 @@ export function ReconciliationProvider({ children }: { children: React.ReactNode
   };
 
   const resetToDefault = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
     const defaults = generateControlledExceptions();
-    saveExceptions(defaults);
+    const fresh = JSON.parse(JSON.stringify(defaults));
+    setExceptions(fresh);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+    } catch (e) {
+      console.error('Failed to save exceptions to localStorage:', e);
+    }
   };
+
 
   return (
     <ReconciliationContext.Provider

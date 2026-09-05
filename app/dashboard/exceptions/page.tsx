@@ -11,6 +11,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useReconciliation } from '@/lib/reconciliation/context';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   AlertTriangle,
   ShieldAlert,
@@ -22,13 +23,34 @@ import {
   RotateCcw,
   Search,
   ExternalLink,
+  Check,
+  Loader2,
 } from 'lucide-react';
 
 export default function ExceptionsDeskPage() {
   const { exceptions, unresolvedCount, highPriorityCount, totalDiscrepancyPaise, resetToDefault } = useReconciliation();
+  const { addToast } = useToast();
   const [severityFilter, setSeverityFilter] = useState<'ALL' | 'HIGH' | 'MEDIUM' | 'LOW'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'open' | 'investigated' | 'resolved'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetDemoCases = () => {
+    setIsResetting(true);
+    setSeverityFilter('ALL');
+    setStatusFilter('ALL');
+    setSearchQuery('');
+    resetToDefault();
+    addToast({
+      title: 'Demo Cases Reset',
+      description: 'All 10 controlled reconciliation exceptions restored to default Open state.',
+      variant: 'success',
+    });
+    setTimeout(() => {
+      setIsResetting(false);
+    }, 700);
+  };
+
 
   const filteredExceptions = useMemo(() => {
     return exceptions.filter((e) => {
@@ -78,13 +100,25 @@ export default function ExceptionsDeskPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={resetToDefault}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+            onClick={handleResetDemoCases}
+            disabled={isResetting}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-60 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-all shadow-sm active:scale-95"
+            title="Restore default controlled test cases and clear filters"
           >
-            <RotateCcw className="h-3.5 w-3.5 text-slate-400" />
-            Reset Demo Cases
+            {isResetting ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 text-indigo-600 animate-spin" />
+                <span>Restoring Cases...</span>
+              </>
+            ) : (
+              <>
+                <RotateCcw className="h-3.5 w-3.5 text-slate-500" />
+                <span>Reset Demo Cases</span>
+              </>
+            )}
           </button>
         </div>
+
       </div>
 
       {/* KPI Cards */}
