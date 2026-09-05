@@ -22,6 +22,8 @@ import {
 import { useDemo } from "@/lib/demo/context";
 import { useReconciliation } from "@/lib/reconciliation/context";
 
+import { LedgerPulseLogo } from "@/components/ui/LedgerPulseLogo";
+
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/exceptions", label: "Exceptions", icon: AlertTriangle, hasBadge: true },
@@ -44,20 +46,10 @@ export function Sidebar() {
   };
 
   const navContent = (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-300 select-none">
+    <div className="flex flex-col h-full bg-slate-950 text-slate-300 select-none border-r border-slate-800/60">
       {/* Brand Header */}
-      <div className="flex items-center space-x-3 px-5 py-5 border-b border-slate-800/80">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
-          <Zap size={18} className="text-white" />
-        </div>
-        <div>
-          <span className="text-base font-bold text-white tracking-tight block">
-            LedgerPulse
-          </span>
-          <span className="text-[10px] text-slate-400 font-mono block">
-            v1.0 • Finance OS
-          </span>
-        </div>
+      <div className="px-5 py-5 border-b border-slate-800/80">
+        <LedgerPulseLogo variant="dark" size="sm" showBadge={true} badgeText="Finance OS" href="/dashboard" />
       </div>
 
       {/* Organization Pill */}

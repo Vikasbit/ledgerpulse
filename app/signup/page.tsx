@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Zap, ArrowRight, Eye, EyeOff, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { LedgerPulseLogo } from "@/components/ui/LedgerPulseLogo";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -78,13 +79,8 @@ export default function SignupPage() {
 
       <div className="w-full max-w-md">
         {/* Brand Logo */}
-        <div className="flex items-center justify-center space-x-2.5 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-2 ring-white">
-            <Zap size={22} className="text-white" />
-          </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">
-            LedgerPulse
-          </span>
+        <div className="flex items-center justify-center mb-8">
+          <LedgerPulseLogo variant="light" size="lg" href="/" />
         </div>
 
         {/* Auth Card */}
